@@ -5,7 +5,7 @@ const { Employee } = require("../models/employees");
 
 
 router.post("/attendance", async (req, res) => {
-    try {
+try {
         const { employeeName } = req.body; 
         const currentTime = new Date();
 

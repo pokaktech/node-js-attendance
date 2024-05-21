@@ -146,6 +146,45 @@ router.delete("/attendance/:id", async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+//rptte
+router.patch("/attendance/:id", async (req, res) => {
+    try {
+        const attendanceId = req.params.id;
+        const currentTime = new Date();
 
+        // Find attendance record by ID
+        const attendanceRecord = await Attendance.findById(attendanceId);
+
+        if (!attendanceRecord) {
+            return res.status(404).json({ message: "Attendance record not found" });
+        }
+
+     
+        const formattedTime = `${currentTime.getHours()}:${String(currentTime.getMinutes())}:${String(currentTime.getSeconds())}`;
+        attendanceRecord.checkOutTime = formattedTime;
+
+        
+        const checkInTimeString = attendanceRecord.checkInTime;
+        const checkOutTimeString = attendanceRecord.checkOutTime;
+        console.log(checkInTimeString,checkOutTimeString);
+        if (!isValidTimeFormat(checkInTimeString) || !isValidTimeFormat(checkOutTimeString)) {
+            return res.status(400).json({ message: "Invalid checkInTime or checkOutTime format" });
+        }
+      
+        // Calculate working hours
+        const workingHours = calculateWorkingHours(checkInTimeString, checkOutTimeString);
+
+        // Assign the calculated working hours to the attendance record
+        attendanceRecord.WorkingHours = workingHours;
+
+        // Save the updated attendance record
+        await attendanceRecord.save();
+
+        res.json(attendanceRecord);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
 
 module.exports = router;
